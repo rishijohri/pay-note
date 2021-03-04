@@ -10,6 +10,8 @@ Ofcourse we would need some form of information about the user. For this app i a
 there is lack of data. To train a ML model, we need data. however coming accross this kind of data is not easy. still I plan to incorporate ML model in the application. theres only so much you can do by coding it yourself.
 ## Second
 UI is terrible, at present it does the bare minimum.
-# third
+## third
+To correctly see the previous transactions records, you first have to install the app, then close the app, and then reopen the app. I plan to address this in future versions
+## fourth
 I was planning to somehow ask information from other apps on the device. I don't know about its feasability, so its still work in progress.
 
