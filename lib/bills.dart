@@ -83,8 +83,8 @@ class _BillsPageState extends State<BillsPage>
       ),
       onTap: () {
         if (allow) {
-          Navigator.of(context)
-              .push(PageRouteBuilder(pageBuilder: (BuildContext context, intro, outer) {
+          Navigator.of(context).push(PageRouteBuilder(
+              pageBuilder: (BuildContext context, intro, outer) {
 //            return individualTilePage(data, specifics);
             return DetailPage(
               data: data,
@@ -181,7 +181,6 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-
   Widget tile(TransactionMoney info) {
     return ListTile(
       title: Text(
@@ -211,7 +210,9 @@ class _DetailPageState extends State<DetailPage> {
       ),
     );
   }
-  int currIndex = 0 ;
+
+  int currIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -241,18 +242,21 @@ class _DetailPageState extends State<DetailPage> {
         },
         itemCount: widget.specifics.length + 1,
       ),
-      bottomNavigationBar: BottomNavigationBar(items: <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.monetization_on), title: Text('Total')),
-        BottomNavigationBarItem(icon: Icon(Icons.assessment), title: Text('Analyse'))
-      ],
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Icon(Icons.monetization_on), label: 'Total'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.assessment), label: 'Analyse')
+        ],
         currentIndex: currIndex,
         selectedItemColor: widget.data.color,
         onTap: (i) {
-        setState(() {
-          currIndex = i;
-        });
-        },),
+          setState(() {
+            currIndex = i;
+          });
+        },
+      ),
     );
   }
 }
-

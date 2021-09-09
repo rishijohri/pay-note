@@ -17,16 +17,16 @@ Future<List<TransactionMoney>> machine() async {
   int transID = prefs.getInt('verse') ?? 0;
   String useDate = prefs.getString('LastDate') ?? '2000-01-01';
   DateTime usableDate = DateTime.parse(useDate);
-  List<String> getList = [] ;
+  List<String> getList = [];
   RandomColor _randomColor = RandomColor();
-  List<Color> colorList = [] ;
+  List<Color> colorList = [];
   var transDatabase = await openDatabase(
-      join(await getDatabasesPath(), 'TransactionStore.db'),
-      onCreate: (db, ver) {
-        return db.execute(
-            "CREATE TABLE TransactionStore(money REAL, date TEXT, bank TEXT, method TEXT, getter TEXT, id INTEGER, color INTEGER)");
-      },
-      version: 1,
+    join(await getDatabasesPath(), 'TransactionStore.db'),
+    onCreate: (db, ver) {
+      return db.execute(
+          "CREATE TABLE TransactionStore(money REAL, date TEXT, bank TEXT, method TEXT, getter TEXT, id INTEGER, color INTEGER)");
+    },
+    version: 1,
   );
   var mapping = await transDatabase.query('TransactionStore');
   if (mapping.isNotEmpty) {
@@ -48,11 +48,11 @@ Future<List<TransactionMoney>> machine() async {
     'debited',
     'paid',
   ];
-  var masters = ['sbi',
+  var masters = [
+    'sbi',
     'paytm',
     'phonpe',
   ];
-
   // Message Processing Starts From Here
   msgs.forEach((element) {
     String address = element.address.toLowerCase().trim();
@@ -62,6 +62,7 @@ Future<List<TransactionMoney>> machine() async {
     masters.forEach((elemental) {
       if (address.contains(elemental)) {
         if (sorts.contains(bow[0]) || sorts.contains(bow[1])) {
+          print(body + "KKKK\n");
           double num;
           String bodyUpdate = body.replaceAll('rs.', 'rs');
           bodyUpdate = bodyUpdate.replaceAll('inr', 'rs');
@@ -94,6 +95,7 @@ Future<List<TransactionMoney>> machine() async {
               if (improvedSort[i] == '.' ||
                   improvedSort[i] == 'on' ||
                   improvedSort[i] == 'at' ||
+                  improvedSort[i] == 'from' ||
                   i >= (improvedSort.length - 1)) {
                 end = false;
               } else {
@@ -115,9 +117,8 @@ Future<List<TransactionMoney>> machine() async {
             }
             submit.add(TransactionMoney(
                 num, date, elemental, elemental, mod, transID, filler));
-            print('added a transaction with id'+transID.toString());
+            print('added a transaction with id' + transID.toString());
             transID++;
-
           }
         }
       }
@@ -129,13 +130,13 @@ Future<List<TransactionMoney>> machine() async {
   if (maps.isNotEmpty) {
     trList = List.generate(maps.length, (i) {
       return TransactionMoney(
-          maps[i]['money'],
-          DateTime.parse(maps[i]['date']),
-          maps[i]['bank'],
-          maps[i]['method'],
-          maps[i]['getter'],
-          maps[i]['id'],
-          Color(maps[i]['color']),
+        maps[i]['money'],
+        DateTime.parse(maps[i]['date']),
+        maps[i]['bank'],
+        maps[i]['method'],
+        maps[i]['getter'],
+        maps[i]['id'],
+        Color(maps[i]['color']),
       );
     });
   }
@@ -144,10 +145,11 @@ Future<List<TransactionMoney>> machine() async {
     prefs.setString('LastDate', submit[0].transDate.toString());
     submit.forEach((element) {
       trList.add(element);
-      transDatabase.insert('TransactionStore', element.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+      transDatabase.insert('TransactionStore', element.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
-  if (trList.isNotEmpty ) {
+  if (trList.isNotEmpty) {
     trList.sort((a, b) {
       return b.transDate.compareTo(a.transDate);
     });
