@@ -8,7 +8,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=1.7.0 <5.0.0"
+  sdk: ">=2.1.0 <5.0.0"
 
 dependencies:
   flutter:
@@ -17,7 +17,6 @@ dependencies:
 
   cupertino_icons: any
   sqflite: any
-  flutter_sms_inbox: any
   liquid_progress_indicator: any
   google_fonts: any
   font_awesome_flutter: any
@@ -25,7 +24,7 @@ dependencies:
   path: any
   shared_preferences: any
   csv: any
-
+  sms_advanced: ^1.0.1
 
 flutter:
 

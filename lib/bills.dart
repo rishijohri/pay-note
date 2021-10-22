@@ -1,8 +1,10 @@
-import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'Transaction.dart';
-import 'machine.dart';
+
+// import 'machine.dart';
+import 'parse.dart';
 
 class BillsPage extends StatefulWidget {
   @override
@@ -38,78 +40,78 @@ class _BillsPageState extends State<BillsPage>
 
   Widget billListTile(
       TransactionMoney data, List<TransactionMoney> specifics, bool allow) {
-    return ListTile(
-      isThreeLine: true,
-      leading: Hero(
-        tag: data,
-        child: CircleAvatar(
+    return Hero(
+      tag: data,
+      child: ListTile(
+        tileColor: data.color,
+        isThreeLine: true,
+        title: Text(
+          data.recipient,
+          style: GoogleFonts.amethysta(
+              color: data.color.computeLuminance() < 0.2
+                  ? Colors.white
+                  : Colors.black,
+              fontSize: 19),
+          textAlign: TextAlign.left,
+          softWrap: false,
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.fromLTRB(5, 12, 0, 11),
           child: Text(
-            data.getter[0],
+            'Using ' +
+                data.method +
+                '\n'
+                    "On " +
+                data.transDate.day.toString() +
+                "/" +
+                data.transDate.month.toString() +
+                "/" +
+                data.transDate.year.toString(),
             style: GoogleFonts.amethysta(
-                fontSize: MediaQuery.of(context).size.width / 11,
+                fontSize: 15,
                 color: data.color.computeLuminance() < 0.2
                     ? Colors.white
                     : Colors.black),
           ),
-          backgroundColor: data.color,
-          minRadius: 1,
-          maxRadius: 25,
         ),
-      ),
-      title: Text(
-        data.getter,
-        style: GoogleFonts.amethysta(color: data.color, fontSize: 19),
-        textAlign: TextAlign.left,
-        softWrap: false,
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.fromLTRB(5, 12, 0, 11),
-        child: Text(
-          'Using ' +
-              data.method +
-              '\n'
-                  "On " +
-              data.transDate.day.toString() +
-              "/" +
-              data.transDate.month.toString() +
-              "/" +
-              data.transDate.year.toString(),
-          style: GoogleFonts.amethysta(fontSize: 15),
+        trailing: Text(
+          'Rs. ' + data.money.toString(),
+          style: GoogleFonts.amethysta(
+              fontSize: 20,
+              color: data.color.computeLuminance() < 0.2
+                  ? Colors.white
+                  : Colors.black),
         ),
-      ),
-      trailing: Text(
-        'Rs. ' + data.money.toString(),
-        style: GoogleFonts.amethysta(fontSize: 20),
-      ),
-      onTap: () {
-        if (allow) {
-          Navigator.of(context).push(PageRouteBuilder(
-              pageBuilder: (BuildContext context, intro, outer) {
+        onTap: () {
+          if (allow) {
+            Navigator.of(context).push(PageRouteBuilder(
+                pageBuilder: (BuildContext context, intro, outer) {
 //            return individualTilePage(data, specifics);
-            return DetailPage(
-              data: data,
-              specifics: specifics,
-            );
-          }));
-        }
-      },
+              return DetailPage(
+                data: data,
+                specifics: specifics,
+              );
+            }));
+          }
+        },
+      ),
     );
   }
 
   Widget animatedBillList(List<TransactionMoney> tr) {
-    List<String> getters = [];
+    List<String> recipients = [];
     tr.forEach((element) {
-      if (!(getters.contains(element.getter))) {
-        getters.add(element.getter);
+      if (!(recipients.contains(element.recipient))) {
+        recipients.add(element.recipient);
       }
     });
 
     return AnimatedList(
       itemBuilder: (BuildContext context, index, animation) {
-        var specGet = tr[index].getter;
+        var specGet = tr[index].recipient;
         List<TransactionMoney> specifics = [];
         tr.forEach((element) {
-          if (element.getter == specGet) {
+          if (element.recipient == specGet) {
             specifics.add(element);
           }
         });
@@ -134,33 +136,31 @@ class _BillsPageState extends State<BillsPage>
     return FutureBuilder(
       builder: (BuildContext context, snapshot) {
         List<TransactionMoney> transact = [];
+
         Widget result;
-        if (snapshot.hasData) {
-          transact = snapshot.data;
-          print(transact);
-//        result = Padding(
-//          padding: const EdgeInsets.only(top: 5),
-//          child: billList(transact),
-//        );
-          usableTransaction = snapshot.data;
-          result = Padding(
-            padding: const EdgeInsets.only(top: 25),
-            child: animatedBillList(snapshot.data),
-          );
-        } else if (snapshot.hasError) {
-          result = Center(
-            child: Text(
-              'Sorry we got a Problem :( ',
-              style: GoogleFonts.amethysta(),
-            ),
-          );
-        } else {
-          result = Center(
-            child: Text(
-              'Wait Just A Moment',
-              style: GoogleFonts.amethysta(fontSize: 25),
-            ),
-          );
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            result = Center(child: Text("Connection State None"));
+            break;
+          case ConnectionState.active:
+          case ConnectionState.waiting:
+            result = Center(child: Text("Connection is waiting"));
+            break;
+          case ConnectionState.done:
+            if (snapshot.hasError) {
+              return Center(
+                  child: Text('snapshot has error ${snapshot.error}'));
+            }
+            transact = snapshot.data;
+            print(transact.length);
+            usableTransaction = snapshot.data;
+            result = Padding(
+              padding: const EdgeInsets.only(top: 25),
+              child: animatedBillList(snapshot.data),
+            );
+            break;
+          default:
+            return Text("Default Returned :| ");
         }
         return result;
       },
@@ -184,7 +184,7 @@ class _DetailPageState extends State<DetailPage> {
   Widget tile(TransactionMoney info) {
     return ListTile(
       title: Text(
-        info.getter,
+        info.recipient,
         style: GoogleFonts.amethysta(color: widget.data.color, fontSize: 19),
         textAlign: TextAlign.left,
         softWrap: false,
@@ -226,7 +226,7 @@ class _DetailPageState extends State<DetailPage> {
                 color: widget.data.color,
                 child: Center(
                   child: Text(
-                    widget.data.getter,
+                    widget.data.recipient,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.amethysta(
                         color: widget.data.color.computeLuminance() < 0.2
