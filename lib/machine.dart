@@ -1,11 +1,10 @@
 import 'dart:ui';
-
-import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'Transaction.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:random_color/random_color.dart';
+import 'package:sms_advanced/sms_advanced.dart';
 
 Future<List<TransactionMoney>> machine() async {
   List<TransactionMoney> submit = [];
@@ -15,8 +14,8 @@ Future<List<TransactionMoney>> machine() async {
   );
   var prefs = await SharedPreferences.getInstance();
   int transID = prefs.getInt('verse') ?? 0;
-  String useDate = prefs.getString('LastDate') ?? '2000-01-01';
-  DateTime usableDate = DateTime.parse(useDate);
+  String beginDateStr = prefs.getString('LastDate') ?? '2000-01-01';
+  DateTime beginDate = DateTime.parse(beginDateStr);
   List<String> getList = [];
   RandomColor _randomColor = RandomColor();
   List<Color> colorList = [];
@@ -24,22 +23,22 @@ Future<List<TransactionMoney>> machine() async {
     join(await getDatabasesPath(), 'TransactionStore.db'),
     onCreate: (db, ver) {
       return db.execute(
-          "CREATE TABLE TransactionStore(money REAL, date TEXT, bank TEXT, method TEXT, getter TEXT, id INTEGER, color INTEGER)");
+          "CREATE TABLE TransactionStore(money REAL, date TEXT, bank TEXT, method TEXT, recipient TEXT, id INTEGER, color INTEGER)");
     },
     version: 1,
   );
   var mapping = await transDatabase.query('TransactionStore');
   if (mapping.isNotEmpty) {
     mapping.forEach((element) {
-      if (!(getList.contains(element['getter']))) {
-        getList.add(element['getter']);
+      if (!(getList.contains(element['recipient']))) {
+        getList.add(element['recipient']);
         colorList.add(Color(element['color']));
       }
     });
   }
 
   msgs.retainWhere((element) {
-    if (element.dateSent.difference(usableDate) > Duration(seconds: 1)) {
+    if (element.dateSent.difference(beginDate) > Duration(seconds: 1)) {
       return true;
     }
     return false;
@@ -134,7 +133,7 @@ Future<List<TransactionMoney>> machine() async {
         DateTime.parse(maps[i]['date']),
         maps[i]['bank'],
         maps[i]['method'],
-        maps[i]['getter'],
+        maps[i]['recipient'],
         maps[i]['id'],
         Color(maps[i]['color']),
       );
